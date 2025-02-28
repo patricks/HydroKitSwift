@@ -1,0 +1,15 @@
+{
+  "originHash" : "5b941492acbcd752b22cdaf8fb119d3ed130a7fa5a42ea598a2b98d7d77d8cde",
+  "pins" : [
+    {
+      "identity" : "zrxpswift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/patricks/ZRXPSwift.git",
+      "state" : {
+        "revision" : "fc1cbaa3dff7c408f7559fcf29004ea512502594",
+        "version" : "1.0.0"
+      }
+    }
+  ],
+  "version" : 3
+}
