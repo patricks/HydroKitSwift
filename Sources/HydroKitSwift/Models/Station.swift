@@ -30,7 +30,7 @@ public struct Station: Identifiable, Sendable {
         groundwaterLevelTimeSeries: [WaterLevelTimeSeriesEntry] = [],
         groundwaterTemperatureTimeSeries: [TemperatureTimeSeriesEntry] = [],
         surfaceWaterLevelTimeSeries: [WaterLevelTimeSeriesEntry] = [],
-        surfaceWaterTemperatureTimeSeries: [TemperatureTimeSeriesEntry] = [],
+        surfaceWaterTemperatureTimeSeries: [TemperatureTimeSeriesEntry] = []
     ) {
         self.number = number
         self.name = name
