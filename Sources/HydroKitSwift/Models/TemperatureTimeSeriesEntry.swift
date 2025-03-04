@@ -9,7 +9,7 @@ import Foundation
 
 public struct TemperatureTimeSeriesEntry: Identifiable, Sendable {
     public let measurement: Measurement<UnitTemperature>
-    public let updateDate: Date
+    public let updateDate: Date // UTC
     public let id = UUID()
 
     public init(value: Double, updateDate: Date) {

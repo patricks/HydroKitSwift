@@ -79,6 +79,8 @@ public struct HydroKit: Sendable {
             guard rawRainfall != station.invalidDataRecordValue else { return nil }
 
             guard let value = Double(rawRainfall) else { return nil }
+
+            // Convert to UTC
             guard let updateDate = DateFormatter.zrxpFormatter(timeZone: timeZone).date(from: rawDate) else { return nil }
 
             return (value, updateDate)
