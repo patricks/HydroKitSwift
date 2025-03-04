@@ -17,8 +17,8 @@ public enum MeasurementType: String, CaseIterable, Codable, Sendable {
 
     public var openDataURL: URL {
         let baseURL = "https://www.land-oberoesterreich.gv.at/files/ogd/hydro/"
-        let path = "HDOOE_Export_\(rawValue).zrxp"
+        let filename = "HDOOE_Export_\(rawValue).zrxp"
 
-        return URL(string: "\(baseURL)\(path)")!
+        return URL(string: "\(baseURL)\(filename)")!
     }
 }

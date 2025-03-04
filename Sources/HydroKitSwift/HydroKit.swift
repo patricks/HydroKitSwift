@@ -30,122 +30,58 @@ public struct HydroKit: Sendable {
 
     /// Parse ZRXP stations and convert them into HydroKit stations.
     public func parseStations(zrxp: ZRXP, measurementType: MeasurementType) -> [Station] {
-        let stations = zrxp.stations.compactMap { station in
-            if let name = station.name, let number = station.number {
-                let water = station.water
+        zrxp.stations.compactMap { station in
+            guard let name = station.name else { return nil }
+            guard let number = station.number else { return nil }
+            guard let timeZoneIdentifier = station.timeZone else { return nil }
+            guard let timeZone = TimeZone(identifier: timeZoneIdentifier) else { return nil }
 
-                switch measurementType {
-                case .airTemperature:
-                    let airTemperatureTimeSeries = parseTemperatureTimeSeries(station: station)
+            let water = station.water
 
-                    return Station(number: number, name: name, water: water, airTemperatureTimeSeries: airTemperatureTimeSeries)
-                case .groundwaterLevel:
-                    let groundwaterLevelTimeSeries = parseWaterLevelTimeSeries(station: station)
+            switch measurementType {
+            case .airTemperature:
+                let timeSeries = parse(station: station, timeZone: timeZone).map { TemperatureTimeSeriesEntry(value: $0.value, updateDate: $0.updateDate) }
 
-                    return Station(number: number, name: name, water: water, groundwaterLevelTimeSeries: groundwaterLevelTimeSeries)
-                case .groundwaterTemperature:
-                    let groundwaterTemperatureTimeSeries = parseTemperatureTimeSeries(station: station)
+                return Station(number: number, name: name, water: water, airTemperatureTimeSeries: timeSeries)
+            case .groundwaterLevel:
+                let timeSeries = parse(station: station, timeZone: timeZone).map { WaterLevelTimeSeriesEntry(value: $0.value, updateDate: $0.updateDate) }
 
-                    return Station(number: number, name: name, water: water, groundwaterTemperatureTimeSeries: groundwaterTemperatureTimeSeries)
-                case .rainfall:
-                    let rainfallTimeSeries = parseRainfallTimeSeries(station: station)
+                return Station(number: number, name: name, water: water, groundwaterLevelTimeSeries: timeSeries)
+            case .groundwaterTemperature:
+                let timeSeries = parse(station: station, timeZone: timeZone).map { TemperatureTimeSeriesEntry(value: $0.value, updateDate: $0.updateDate) }
 
-                    return Station(number: number, name: name, water: water, rainFallTimeSeries: rainfallTimeSeries)
-                case .surfaceWaterLevel:
-                    let surfaceWaterLevelTimeSeries = parseWaterLevelTimeSeries(station: station)
+                return Station(number: number, name: name, water: water, groundwaterTemperatureTimeSeries: timeSeries)
+            case .rainfall:
+                let timeSeries = parse(station: station, timeZone: timeZone).map { RainfallTimeSeriesEntry(value: $0.value, updateDate: $0.updateDate) }
 
-                    return Station(number: number, name: name, water: water, surfaceWaterLevelTimeSeries: surfaceWaterLevelTimeSeries)
-                case .surfaceWaterTemperature:
-                    let surfaceWaterTemperatureTimeSeries = parseTemperatureTimeSeries(station: station)
+                return Station(number: number, name: name, water: water, rainFallTimeSeries: timeSeries)
+            case .surfaceWaterLevel:
+                let timeSeries = parse(station: station, timeZone: timeZone).map { WaterLevelTimeSeriesEntry(value: $0.value, updateDate: $0.updateDate) }
 
-                    return Station(number: number, name: name, water: water, surfaceWaterTemperatureTimeSeries: surfaceWaterTemperatureTimeSeries)
-                }
-            } else {
-                return nil
+                return Station(number: number, name: name, water: water, surfaceWaterLevelTimeSeries: timeSeries)
+            case .surfaceWaterTemperature:
+                let timeSeries = parse(station: station, timeZone: timeZone).map { TemperatureTimeSeriesEntry(value: $0.value, updateDate: $0.updateDate) }
+
+                return Station(number: number, name: name, water: water, surfaceWaterTemperatureTimeSeries: timeSeries)
             }
         }
-
-        return stations
     }
 
-    private func parseTemperatureTimeSeries(station: ZRXPSwift.Station) -> [TemperatureTimeSeriesEntry] {
-        var temperatureTimeSeriesEntries = [TemperatureTimeSeriesEntry]()
-
-        for timeSeriesValue in station.timeSeriesValues {
-            guard let layoutCount = station.layout?.count else { continue }
-            guard timeSeriesValue.count == layoutCount && timeSeriesValue.count >= 2 else { continue }
-
-            let rawDate = timeSeriesValue[0]
-            let rawTemperature = timeSeriesValue[1]
-
-            // Filter out invalid data
-            guard rawTemperature != station.invalidDataRecordValue else { continue }
-
-            guard let temperature = Double(rawTemperature) else { continue }
-
-            let timeZoneIdentifier = station.timeZone ?? "UTC"  // Use UTC as fallback
-            guard let timeZone = TimeZone(identifier: timeZoneIdentifier) else { continue }
-            guard let updateDate = DateFormatter.zrxpFormatter(timeZone: timeZone).date(from: rawDate) else { continue }
-
-            let temperatureTimeSeriesEntry = TemperatureTimeSeriesEntry(value: temperature, updateDate: updateDate)
-
-            temperatureTimeSeriesEntries.append(temperatureTimeSeriesEntry)
-        }
-
-        return temperatureTimeSeriesEntries
-    }
-
-    private func parseWaterLevelTimeSeries(station: ZRXPSwift.Station) -> [WaterLevelTimeSeriesEntry] {
-        var waterLevelTimeSeriesEntries = [WaterLevelTimeSeriesEntry]()
-
-        for timeSeriesValue in station.timeSeriesValues {
-            guard let layoutCount = station.layout?.count else { continue }
-            guard timeSeriesValue.count == layoutCount && timeSeriesValue.count >= 2 else { continue }
-
-            let rawDate = timeSeriesValue[0]
-            let rawWaterLevel = timeSeriesValue[1]
-
-            // Filter out invalid data
-            guard rawWaterLevel != station.invalidDataRecordValue else { continue }
-
-            guard let waterLevel = Double(rawWaterLevel) else { continue }
-
-            let timeZoneIdentifier = station.timeZone ?? "UTC"  // Use UTC as fallback
-            guard let timeZone = TimeZone(identifier: timeZoneIdentifier) else { continue }
-            guard let updateDate = DateFormatter.zrxpFormatter(timeZone: timeZone).date(from: rawDate) else { continue }
-
-            let waterLevelTimeSeriesEntry = WaterLevelTimeSeriesEntry(value: waterLevel, updateDate: updateDate)
-
-            waterLevelTimeSeriesEntries.append(waterLevelTimeSeriesEntry)
-        }
-
-        return waterLevelTimeSeriesEntries
-    }
-
-    private func parseRainfallTimeSeries(station: ZRXPSwift.Station) -> [RainfallTimeSeriesEntry] {
-        var rainfallTimeSeriesEntries = [RainfallTimeSeriesEntry]()
-
-        for timeSeriesValue in station.timeSeriesValues {
-            guard let layoutCount = station.layout?.count else { continue }
-            guard timeSeriesValue.count == layoutCount && timeSeriesValue.count >= 2 else { continue }
+    private func parse(station: ZRXPSwift.Station, timeZone: TimeZone) -> [(value: Double, updateDate: Date)] {
+        station.timeSeriesValues.compactMap { timeSeriesValue -> (value: Double, updateDate: Date)? in
+            guard let layoutCount = station.layout?.count else { return nil }
+            guard timeSeriesValue.count == layoutCount && timeSeriesValue.count >= 2 else { return nil }
 
             let rawDate = timeSeriesValue[0]
             let rawRainfall = timeSeriesValue[1]
 
             // Filter out invalid data
-            guard rawRainfall != station.invalidDataRecordValue else { continue }
+            guard rawRainfall != station.invalidDataRecordValue else { return nil }
 
-            guard let rainfall = Double(rawRainfall) else { continue }
+            guard let value = Double(rawRainfall) else { return nil }
+            guard let updateDate = DateFormatter.zrxpFormatter(timeZone: timeZone).date(from: rawDate) else { return nil }
 
-            let timeZoneIdentifier = station.timeZone ?? "UTC"  // Use UTC as fallback
-            guard let timeZone = TimeZone(identifier: timeZoneIdentifier) else { continue }
-            guard let updateDate = DateFormatter.zrxpFormatter(timeZone: timeZone).date(from: rawDate) else { continue }
-
-            let rainfallTimeSeriesEntry = RainfallTimeSeriesEntry(value: rainfall, updateDate: updateDate)
-
-            rainfallTimeSeriesEntries.append(rainfallTimeSeriesEntry)
+            return (value, updateDate)
         }
-
-        return rainfallTimeSeriesEntries
     }
 }
