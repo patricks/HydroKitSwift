@@ -10,21 +10,23 @@ import Foundation
 public struct Station: Identifiable, Sendable {
     public let number: String
     public let name: String
-    public var water: String?
+    public let water: String?
+    public let timeZone: TimeZone
 
     public var id: String { number }
 
-    public var airTemperatureTimeSeries: [TemperatureTimeSeriesEntry]
-    public var rainfallTimeSeries: [RainfallTimeSeriesEntry]
-    public var groundwaterLevelTimeSeries: [WaterLevelTimeSeriesEntry]
-    public var groundwaterTemperatureTimeSeries: [TemperatureTimeSeriesEntry]
-    public var surfaceWaterLevelTimeSeries: [WaterLevelTimeSeriesEntry]
-    public var surfaceWaterTemperatureTimeSeries: [TemperatureTimeSeriesEntry]
+    public let airTemperatureTimeSeries: [TemperatureTimeSeriesEntry]
+    public let rainfallTimeSeries: [RainfallTimeSeriesEntry]
+    public let groundwaterLevelTimeSeries: [WaterLevelTimeSeriesEntry]
+    public let groundwaterTemperatureTimeSeries: [TemperatureTimeSeriesEntry]
+    public let surfaceWaterLevelTimeSeries: [WaterLevelTimeSeriesEntry]
+    public let surfaceWaterTemperatureTimeSeries: [TemperatureTimeSeriesEntry]
 
     public init(
         number: String,
         name: String,
-        water: String? = nil,
+        water: String?,
+        timeZone: TimeZone,
         airTemperatureTimeSeries: [TemperatureTimeSeriesEntry] = [],
         rainFallTimeSeries: [RainfallTimeSeriesEntry] = [],
         groundwaterLevelTimeSeries: [WaterLevelTimeSeriesEntry] = [],
@@ -35,6 +37,7 @@ public struct Station: Identifiable, Sendable {
         self.number = number
         self.name = name
         self.water = water
+        self.timeZone = timeZone
         self.airTemperatureTimeSeries = airTemperatureTimeSeries
         self.rainfallTimeSeries = rainFallTimeSeries
         self.groundwaterLevelTimeSeries = groundwaterLevelTimeSeries

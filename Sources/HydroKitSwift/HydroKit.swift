@@ -42,27 +42,27 @@ public struct HydroKit: Sendable {
             case .airTemperature:
                 let timeSeries = parse(station: station, timeZone: timeZone).map { TemperatureTimeSeriesEntry(value: $0.value, updateDate: $0.updateDate) }
 
-                return Station(number: number, name: name, water: water, airTemperatureTimeSeries: timeSeries)
+                return Station(number: number, name: name, water: water, timeZone: timeZone, airTemperatureTimeSeries: timeSeries)
             case .groundwaterLevel:
                 let timeSeries = parse(station: station, timeZone: timeZone).map { WaterLevelTimeSeriesEntry(value: $0.value, updateDate: $0.updateDate) }
 
-                return Station(number: number, name: name, water: water, groundwaterLevelTimeSeries: timeSeries)
+                return Station(number: number, name: name, water: water, timeZone: timeZone, groundwaterLevelTimeSeries: timeSeries)
             case .groundwaterTemperature:
                 let timeSeries = parse(station: station, timeZone: timeZone).map { TemperatureTimeSeriesEntry(value: $0.value, updateDate: $0.updateDate) }
 
-                return Station(number: number, name: name, water: water, groundwaterTemperatureTimeSeries: timeSeries)
+                return Station(number: number, name: name, water: water, timeZone: timeZone, groundwaterTemperatureTimeSeries: timeSeries)
             case .rainfall:
                 let timeSeries = parse(station: station, timeZone: timeZone).map { RainfallTimeSeriesEntry(value: $0.value, updateDate: $0.updateDate) }
 
-                return Station(number: number, name: name, water: water, rainFallTimeSeries: timeSeries)
+                return Station(number: number, name: name, water: water, timeZone: timeZone, rainFallTimeSeries: timeSeries)
             case .surfaceWaterLevel:
                 let timeSeries = parse(station: station, timeZone: timeZone).map { WaterLevelTimeSeriesEntry(value: $0.value, updateDate: $0.updateDate) }
 
-                return Station(number: number, name: name, water: water, surfaceWaterLevelTimeSeries: timeSeries)
+                return Station(number: number, name: name, water: water, timeZone: timeZone, surfaceWaterLevelTimeSeries: timeSeries)
             case .surfaceWaterTemperature:
                 let timeSeries = parse(station: station, timeZone: timeZone).map { TemperatureTimeSeriesEntry(value: $0.value, updateDate: $0.updateDate) }
 
-                return Station(number: number, name: name, water: water, surfaceWaterTemperatureTimeSeries: timeSeries)
+                return Station(number: number, name: name, water: water, timeZone: timeZone, surfaceWaterTemperatureTimeSeries: timeSeries)
             }
         }
     }
